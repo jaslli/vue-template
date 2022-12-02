@@ -1,0 +1,57 @@
+{
+  // compilerOptions  ts编译器的设置选项
+  "compilerOptions": {
+    // target ts编译后的版本
+    "target": "ESNext",
+    // module 指定使用的模块规范
+    "module": "ESNext",
+    // lib  指定编译中的库
+    "lib": ["ESNext", "DOM"],
+    // strict  是否启动所有类型检查
+    "strict": true,
+    // allowJs  是否编译JS，默认为false
+    "allowJs": true,
+    // sourceMap  编译是否生成.map文件
+    "sourceMap": true,
+    // baseUrl  指定解析非相对模块名称的基本目录
+    "baseUrl": ".",
+    // 通过导入内容创建命名空间，实现CommonJS和ES模块之间的互操作性
+    "esModuleInterop": true,
+    // useDefineForClassFields  将 class 声明中的字段语义从 [[Set]] 变更到 [[Define]]
+    "useDefineForClassFields": true,
+    // noUnusedLocals  检查是否有定义了但是没有使用变量
+    "noUnusedLocals": true,
+    // noUnusedParameters  检查是否在函数中没有使用的参数
+    "noUnusedParameters": true,
+    // noImplicitAny  默认将没有明确类型的值指定为any类型
+    "noImplicitAny": false,
+    // skipLibCheck  跳过类型不一致检查
+    "skipLibCheck": true,
+    // moduleResolution  选择模块解析策略，有"node"和"classic"两种类型
+    "moduleResolution": "Node",
+    "jsx": "preserve",
+    // resolveJsonModule  可以在ts中引入json模块
+    "resolveJsonModule": true,
+    // isolatedModules  将每个文件作为单独的模块
+    "isolatedModules": true,
+    // noEmit  不生成编译文件
+    "noEmit": true,
+    // paths  设置模块名到基于baseUrl的路径映射
+    "paths": {
+      "/@/*": ["src/*"]
+    }
+  },
+  // include  指定需要编译的ts文件
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "plugins/*.ts",
+    "vite.config.ts",
+    "./auto-imports.d.ts",
+    "./components.d.ts"
+  ],
+  // exclude  指定不需要被编译的ts目录文件
+  "exclude": ["node_modules", "dist", "**/*.js"]
+}
