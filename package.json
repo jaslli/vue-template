@@ -10,8 +10,12 @@
   },
   "dependencies": {
     "@types/node": "^18.11.10",
+    "axios": "^1.2.1",
+    "js-cookie": "^3.0.1",
+    "nprogress": "^0.2.0",
     "pinia": "^2.0.27",
     "pinia-plugin-persistedstate": "^3.0.1",
+    "qs": "^6.11.0",
     "vue": "^3.2.41",
     "vue-router": "4"
   },

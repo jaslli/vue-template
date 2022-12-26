@@ -38,7 +38,8 @@
     "noEmit": true,
     // paths  设置模块名到基于baseUrl的路径映射
     "paths": {
-      "/@/*": ["src/*"]
+      "/@/*": ["src/*"],
+      "/#/*": ["types/*"]
     }
   },
   // include  指定需要编译的ts文件
@@ -47,10 +48,10 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "plugins/*.ts",
+    "src/plugins/*.ts",
     "vite.config.ts",
-    "./auto-imports.d.ts",
-    "./components.d.ts"
+    "types/**/*.d.ts",
+    "types/**/*.ts"
   ],
   // exclude  指定不需要被编译的ts目录文件
   "exclude": ["node_modules", "dist", "**/*.js"]

@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import { createVitePlugins } from './plugins';
+import { createVitePlugins } from '/@/plugins';
 import { resolve } from "path";
 
 export default defineConfig({
@@ -11,19 +11,29 @@ export default defineConfig({
         find: /\/@\//,
         replacement: pathResolve('src') + '/',
       },
+      {
+        find: /\/#\//,
+        replacement: pathResolve('types') + '/',
+      }
     ]
   },
   // plugins
   plugins: createVitePlugins(),
   // server
   // server: {
-  //   hmr: { overlay: false }, // 禁用或配置 HMR 连接 设置 server.hmr.overlay 为 false 可以禁用服务器错误遮罩层
-  //  服务配置
-  //   port: VITE_PORT, // 类型： number 指定服务器端口;
-  //   open: false, // 类型： boolean | string在服务器启动时自动在浏览器中打开应用程序；
-  //   cors: false, // 类型： boolean | CorsOptions 为开发服务器配置 CORS。默认启用并允许任何源
-  //   host: '0.0.0.0', // IP配置，支持从IP启动
-  //   proxy,
+  //   host: '0.0.0.0',          // 类型： string | boolean IP配置，支持从IP启动
+  //   port: 5173,               // 类型： number  | 指定服务启动端口
+  //   https: false,             // 类型： boolean | https.ServerOptions 是否开启 https
+  //   open: false,              // 类型： boolean | string 在服务启动时自动在浏览器中打开
+  //   hmr: { overlay: false },  // 禁用或配置 HMR 连接
+  //   proxy: {                  //  类型： Record<string, string | ProxyOptions> 服务器配置自定义代理规则
+  //     "/api": {
+  //       target: "http://localhost:7777/",
+  //       changeOrigin: true,   // 开发模式，默认的origin是真实的 origin:localhost:3000 代理服务会把origin修改为目标地址
+  //       rewrite: (path) => path.replace(/^\/api/, ""),
+  //     }
+  //   },
+  //   cors: true,       // 类型： boolean | 是否允许跨域
   // },
 })
 

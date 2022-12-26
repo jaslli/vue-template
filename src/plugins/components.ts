@@ -4,10 +4,11 @@
  */
 
 import Components from 'unplugin-vue-components/vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export const RegistryComponents = () => {
   return Components({
-    resolvers: [ElementPlusResolver()]
+    dts: 'types/components.d.ts',
+    dirs: ['src/components'],
+    // resolvers: [ElementPlusResolver()]
   });
 };
