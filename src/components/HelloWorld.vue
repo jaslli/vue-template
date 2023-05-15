@@ -1,10 +1,9 @@
 <script setup lang="ts">
-let msg:String = 'hello world'
+const msg: String = 'hello world';
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
+	<h1>{{ msg }}</h1>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -1,17 +1,16 @@
-// @ts-ignore
-import Cookies from "js-cookie";
+import Cookies from 'js-cookie';
 
 /**
  * Token的名称
  */
-const TOKEN_KEY = 'Admin-Token'
+const TOKEN_KEY = 'Admin-Token';
 
 /**
  * 从cookie中获取cookie
  * @returns token
  */
 export function getToken() {
-    return Cookies.get(TOKEN_KEY)
+	return Cookies.get(TOKEN_KEY);
 }
 
 /**
@@ -20,7 +19,7 @@ export function getToken() {
  * @returns true Or false
  */
 export function setToken(data: { token: string }) {
-    return Cookies.set(TOKEN_KEY, data)
+	return Cookies.set(TOKEN_KEY, data);
 }
 
 /**
@@ -28,5 +27,13 @@ export function setToken(data: { token: string }) {
  * @returns true Or false
  */
 export function removeToken() {
-    return Cookies.remove(TOKEN_KEY)
+	return Cookies.remove(TOKEN_KEY);
 }
+
+/**
+ * 格式化token（jwt格式）
+ * @param token	token
+ */
+export const formatToken = (token: string): string => {
+	return "Bearer " + token;
+};

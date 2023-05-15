@@ -1,26 +1,26 @@
-import { createRouter,createWebHashHistory } from 'vue-router'
-import NProgress from '/@/plugins/nprogress';
-import HelloWorld from '/@/components/HelloWorld.vue'
+import { createRouter, createWebHashHistory } from 'vue-router';
+import NProgress from '/@/plugins/nprogress/nprogress.css';
+import HelloWorld from '/@/components/HelloWorld.vue';
 
 const routes = [
-  {
-    path: '/',
-    component: HelloWorld
-  }
-]
+	{
+		path: '/',
+		component: HelloWorld
+	}
+];
 
 const router = createRouter({
-  history: createWebHashHistory(),
-  routes
-})
+	history: createWebHashHistory(),
+	routes
+});
 
 router.beforeEach(async (_to, _from, next) => {
-  NProgress.start();
-  next();
+	NProgress.start();
+	next();
 });
 
 router.afterEach((_to) => {
-  NProgress.done();
+	NProgress.done();
 });
 
-export default router
+export default router;
