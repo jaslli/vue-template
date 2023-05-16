@@ -1,156 +1,192 @@
-import Axios, { AxiosInstance, AxiosRequestConfig, CustomParamsSerializer } from "axios";
-import { CloudHttpError, RequestMethods, CloudHttpResoponse, CloudHttpRequestConfig } from "./type";
-import { getToken } from "/@/utils/auth";
-import { stringify } from "qs";
+import axios, {
+	type CustomParamsSerializer,
+	type AxiosInstance,
+	type AxiosResponse
+} from 'axios';
+import { stringify } from 'qs';
+import {
+	type BaseApiResponse,
+	type ExpandAxiosRequestConfig,
+	type ExpandAxiosResponse,
+	type InterceptorHooks
+} from '/@/utils/http/types';
+import { getToken } from '/@/utils/auth';
 
-// 请求实例
-const defaultConfig: AxiosRequestConfig = {
-    baseURL: "/api",
-    timeout: 10000,
-    timeoutErrorMessage: "服务器繁忙，请求超时！",
-    headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "multipart/form-data",
-        "X-Requested-With": "XMLHttpRequest"
-    },
-    // 数组格式参数序列化（https://github.com/axios/axios/issues/5142)
-    paramsSerializer: {
-        serialize: stringify as unknown as CustomParamsSerializer
-    }
-};
+// 导出Request类，可以用来自定义传递配置来创建实例
+class Request {
+	// axios 实例
+	private readonly _instance: AxiosInstance;
+	// 默认配置
+	private readonly _defaultConfig: ExpandAxiosRequestConfig = {
+		baseURL: '/api',
+		timeout: 10000,
+		timeoutErrorMessage: '服务器繁忙，请求超时！',
+		headers: {
+			Accept: 'application/json, text/plain, */*',
+			'Content-Type': 'multipart/form-data',
+			'X-Requested-With': 'XMLHttpRequest'
+		},
+		// 数组格式参数序列化（https://github.com/axios/axios/issues/5142)
+		paramsSerializer: {
+			serialize: stringify as unknown as CustomParamsSerializer
+		},
+		requestOptions: {
+			globalErrorMessage: true,
+			globalSuccessMessage: false
+		}
+	};
 
-class Http {
-    // 构造器
-    constructor() {
-        this.httpInterceptorsRequest();
-        this.httpInterceptorsResponse();
-    }
-    // 初始化配置对象
-    private static initConfig: CloudHttpRequestConfig = {};
+	private readonly _interceptorHooks?: InterceptorHooks;
 
-    // 保存当前Axios实例对象
-    private static axiosInstance: AxiosInstance = Axios.create(defaultConfig);
+	constructor(config: ExpandAxiosRequestConfig) {
+		// 使用axios.create创建axios实例
+		this._instance = axios.create(Object.assign(this._defaultConfig, config));
+		this._interceptorHooks = config.interceptorHooks;
+		this.setupInterceptors();
+	}
 
-    // 请求拦截
-    private httpInterceptorsRequest(): void {
-        Http.axiosInstance.interceptors.request.use((config: CloudHttpRequestConfig) => {
-                const $config = config;
-                // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
-                if (typeof config.beforeRequestCallback === "function") {
-                    config.beforeRequestCallback($config);
-                    return $config;
-                }
-                if (Http.initConfig.beforeRequestCallback) {
-                    Http.initConfig.beforeRequestCallback($config);
-                    return $config;
-                }
-                const token = getToken();
-                if (token) {
-                    config.headers!["Authorization"] = "Bearer " + token;
-                    return $config;
-                } else {
-                    return $config;
-                }
-            }, (error) => {
-                return Promise.reject(error);
-            }
-        );
-    }
+	// 通用拦截，在初始化时就进行注册和运行，对基础属性进行处理
+	private setupInterceptors() {
+		this._instance.interceptors.request.use(
+			this._interceptorHooks?.requestInterceptor,
+			this._interceptorHooks?.requestInterceptorCatch
+		);
+		this._instance.interceptors.response.use(
+			this._interceptorHooks?.responseInterceptor,
+			this._interceptorHooks?.responseInterceptorCatch
+		);
+	}
 
-    // 响应拦截
-    private httpInterceptorsResponse(): void {
-        const instance = Http.axiosInstance;
-        instance.interceptors.response.use((response: CloudHttpResoponse) => {
-                const $config = response.config;
-                // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
-                if (typeof $config.beforeResponseCallback === "function") {
-                    $config.beforeResponseCallback(response);
-                    return response.data;
-                }
-                if (Http.initConfig.beforeResponseCallback) {
-                    Http.initConfig.beforeResponseCallback(response);
-                    return response.data;
-                }
-                return response.data;
-            }, (error: CloudHttpError) => {
-                const $error = error;
-                $error.isCancelRequest = Axios.isCancel($error);
-                // 所有的响应异常 区分来源为取消请求/非取消请求
-                return Promise.reject($error);
-            }
-        );
-    }
+	// 定义核心请求
+	public async request(
+		config: ExpandAxiosRequestConfig
+	): Promise<AxiosResponse> {
+		// ！！！⚠️ 注意：axios 已经将请求使用 promise 封装过了
+		// 这里直接返回，不需要我们再使用 promise 封装一层
+		return await this._instance.request(config);
+	}
 
-    /**
-     * 通用请求工具函数
-     *
-     * 1. GET请求
-     *  params传参
-     * http.request('get', '/xxx', params });
-     *  url拼接传参
-     * http.request('get', '/xxx?message=' + msg);
-     *
-     * 2. POST请求
-     *  params传参
-     * http.request('post', '/xxx', { params: param });
-     *  data传参
-     * http.request('post', '/xxx', { data: param });
-     *
-     */
-    public request<T>(
-        method: RequestMethods,
-        url: string,
-        param?: AxiosRequestConfig,
-        axiosConfig?: CloudHttpRequestConfig
-    ): Promise<T> {
-        const config = {
-            method,
-            url,
-            ...param,
-            ...axiosConfig
-        } as CloudHttpRequestConfig;
+	/**
+	 * 通用请求工具函数
+	 *
+	 * 1. GET请求
+	 *  params传参
+	 * request.get('/xxx', params });
+	 *  url拼接传参
+	 * request.get('/xxx?message=' + msg);
+	 *
+	 * 2. POST请求
+	 *  params传参
+	 * request.post('post', '/xxx', { params: param });
+	 *  data传参
+	 * request.post('post', '/xxx', { data: data });
+	 *
+	 */
+	public async get<T = any>(
+		url: string,
+		params?: T,
+		config?: ExpandAxiosRequestConfig
+	): Promise<AxiosResponse<BaseApiResponse<T>>> {
+		if (params != undefined) {
+			url += '?' + stringify(params, { arrayFormat: 'brackets' });
+		}
+		return await this._instance.get(url, config);
+	}
 
-        // 单独处理自定义请求/响应回调
-        return new Promise((resolve, reject) => {
-            Http.axiosInstance
-                .request(config)
-                .then((response: any) => {
-                    resolve(response);
-                })
-                .catch((error) => {
-                    reject(error);
-                });
-        });
-    }
+	public async post<T = any>(
+		url: string,
+		params?: T,
+		data?: any,
+		config?: ExpandAxiosRequestConfig
+	): Promise<T> {
+		if (params != undefined) {
+			url += '?' + stringify(params, { arrayFormat: 'brackets' });
+		}
+		return await this._instance.post(url, data, config);
+	}
 
-    // 单独抽离的get工具函数
-    public get<T, P>(url: string, params?: T, config?: CloudHttpRequestConfig): Promise<P> {
-        return this.request<P>("GET", url, { params }, config);
-    }
+	public async put<T = any>(
+		url: string,
+		params?: T,
+		data?: any,
+		config?: ExpandAxiosRequestConfig
+	): Promise<T> {
+		if (params != undefined) {
+			url += '?' + stringify(params, { arrayFormat: 'brackets' });
+		}
+		return await this._instance.put(url, data, config);
+	}
 
-    // 单独抽离的post工具函数
-    public post<T, P>(
-        url: string,
-        params?: AxiosRequestConfig<T>,
-        config?: CloudHttpRequestConfig
-    ): Promise<P> {
-        return this.request<P>("POST", url, params, config);
-    }
-
-    // 单独抽离的delete工具函数
-    public delete<T, P>(url: string, params?: T, config?: CloudHttpRequestConfig): Promise<P> {
-        return this.request<P>("PUT", url, { params }, config);
-    }
-
-    // 单独抽离的put工具函数
-    public put<T, P>(
-        url: string,
-        params?: AxiosRequestConfig<T>,
-        config?: CloudHttpRequestConfig
-    ): Promise<P> {
-        return this.request<P>("DELETE", url, params, config);
-    }
-
+	public async delete<T = any>(
+		url: string,
+		params?: T,
+		config?: ExpandAxiosRequestConfig
+	): Promise<T> {
+		if (params != undefined) {
+			url += '?' + stringify(params, { arrayFormat: 'brackets' });
+		}
+		return await this._instance.delete(url, config);
+	}
 }
 
-export const http = new Http();
+const MyInterceptorHooks: InterceptorHooks = {
+	// 请求拦截器
+	requestInterceptor(config) {
+		// 请求头部处理，如添加 token
+		const token = getToken();
+		if (token != null && token.trim.length > 0) {
+			config.headers.Authorization = token;
+		}
+		return config;
+	},
+	// 请求错误捕获器
+	async requestInterceptorCatch(err) {
+		// 请求错误，这里可以用全局提示框进行提示
+		return await Promise.reject(err);
+	},
+	// 响应拦截器
+	responseInterceptor(result) {
+		// 因为 axios 返回不支持扩展自定义配置，需要自己断言一下
+		const res = result as ExpandAxiosResponse;
+		// 与后端约定的请求成功码
+		const SUCCESS_CODE = 200;
+		if (res.status !== 200) {
+			return Promise.reject(res);
+		}
+		if (res.data.code !== SUCCESS_CODE) {
+			if (res.config.requestOptions?.globalErrorMessage) {
+				// 这里全局提示错误
+				console.error(res.data.message);
+			}
+			return Promise.reject(res.data);
+		}
+		if (res.config.requestOptions?.globalSuccessMessage) {
+			// 这里全局提示请求成功
+			console.log(res.data.message);
+		}
+		// 请求返回值，建议将 返回值 进行解构
+		return res.data.result;
+	},
+	async responseInterceptorCatch(err) {
+		// 这里用来处理 http 常见错误，进行全局提示
+		const mapErrorStatus = new Map([
+			[400, '请求方式错误'],
+			[401, '请重新登录'],
+			[403, '拒绝访问'],
+			[404, '请求地址有误'],
+			[500, '服务器出错']
+		]);
+		const message =
+			mapErrorStatus.get(err.response.status) ?? '请求出错，请稍后再试';
+		// 此处全局报错
+		console.error(message);
+		return await Promise.reject(err.response);
+	}
+};
+
+const request = new Request({
+	baseURL: '/api',
+	interceptorHooks: MyInterceptorHooks
+});
+
+export default request;

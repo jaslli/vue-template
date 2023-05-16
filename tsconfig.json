@@ -26,8 +26,8 @@
 		"noEmit": true, // noEmit  不生成编译文件
 		// paths  设置模块名到基于baseUrl的路径映射
 		"paths": {
-			"/@/*": ["src/*"],
-			"/#/*": ["types/*"]
+			"/@/*": ["./src/*"],
+			"/#/*": ["./types/*"]
 		}
 	},
 	// include  指定需要编译的ts文件

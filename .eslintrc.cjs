@@ -28,6 +28,8 @@ module.exports = {
 	rules: {
 		'prettier/prettier': 'error',
 		'@typescript-eslint/explicit-function-return-type': 'off',
-		'no-use-before-define': 'off'
+		'no-use-before-define': 'off',
+		'import/no-absolute-path': 'off',
+		'@typescript-eslint/strict-boolean-expressions': 'off'
 	}
 };

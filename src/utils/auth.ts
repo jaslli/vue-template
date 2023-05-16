@@ -35,5 +35,5 @@ export function removeToken() {
  * @param token	token
  */
 export const formatToken = (token: string): string => {
-	return "Bearer " + token;
+	return 'Bearer ' + token;
 };

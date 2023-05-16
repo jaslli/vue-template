@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import NProgress from '/@/plugins/nprogress/nprogress.css';
+import NProgress from '/@/plugins/nprogress';
 import HelloWorld from '/@/components/HelloWorld.vue';
 
 const routes = [
