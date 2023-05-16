@@ -1,0 +1,1 @@
+一个自建的 vue3 + vite + ts + router4 + pinia 的模板项目。
